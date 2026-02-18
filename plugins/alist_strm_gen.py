@@ -12,6 +12,7 @@ import os
 import re
 import json
 import requests
+from urllib.parse import quote
 
 
 class Alist_strm_gen:
@@ -23,6 +24,7 @@ class Alist_strm_gen:
         "storage_id": "",  # Alist 服务器夸克存储 ID
         "strm_save_dir": "/media",  # 生成的 strm 文件保存的路径
         "strm_replace_host": "",  # strm 文件内链接的主机地址 （可选，缺省时=url）
+        "strm_replace_path": "",  # strm 文件内替换挂载路径前缀（可选，如填 /115_OPEN 则替换 storage_mount_path）
     }
     default_task_config = {
         "auto_gen": True,  # 是否自动生成 strm 文件
@@ -172,8 +174,16 @@ class Alist_strm_gen:
             sign_param = (
                 "" if not file_info.get("sign") else f"?sign={file_info['sign']}"
             )
+            # 替换挂载路径前缀
+            strm_file_path = file_path
+            if self.strm_replace_path:
+                strm_file_path = file_path.replace(
+                    self.storage_mount_path, self.strm_replace_path, 1
+                )
+            # URL 编码路径
+            strm_file_path = quote(strm_file_path, safe="/")
             with open(strm_path, "w", encoding="utf-8") as strm_file:
-                strm_file.write(f"{self.strm_server}{file_path}{sign_param}")
+                strm_file.write(f"{self.strm_server}{strm_file_path}{sign_param}")
             print(f"📺 生成STRM文件 {strm_path} 成功✅")
 
     def get_root_folder_full_path(self, cookie, pdir_fid):
