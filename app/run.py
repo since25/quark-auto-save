@@ -25,6 +25,8 @@ import hashlib
 import logging
 import traceback
 import base64
+import re
+import threading
 import sys
 import os
 import re
@@ -479,6 +481,16 @@ def add_task():
     config_data["tasklist"].append(request_data)
     Config.write_json(CONFIG_PATH, config_data)
     logging.info(f">>> 通过API添加任务: {request_data['taskname']}")
+    # 立即触发一次任务执行
+    try:
+        threading.Thread(
+            target=run_python,
+            args=(f"{SCRIPT_PATH} {CONFIG_PATH}",),
+            daemon=True
+        ).start()
+    except Exception as e:
+        logging.error(f">>> 触发立即执行失败: {str(e)}")
+        
     return jsonify(
         {"success": True, "code": 0, "message": "任务添加成功", "data": request_data}
     )
