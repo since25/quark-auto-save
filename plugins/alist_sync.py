@@ -282,10 +282,19 @@ class Alist_sync:
         )
         response = self._send_request("POST", url, data=payload)
         if response.status_code != 200:
-            print(f"获取Alist目录出错: {response}")
+            print(f"获取Alist目录出错: {response.status_code} {response.text}")
             return False
         else:
-            return response.json()["data"]["content"]
+            try:
+                res_json = response.json()
+                if res_json.get("code") == 200 and res_json.get("data"):
+                    return res_json["data"].get("content", [])
+                else:
+                    print(f"获取Alist目录内容为空或异常: {res_json.get('message', '未知错误')}")
+                    return False
+            except Exception as e:
+                print(f"解析Alist目录响应失败: {e}")
+                return False
 
     def get_path(self, path):
         url = f"{self.url}/api/fs/list"

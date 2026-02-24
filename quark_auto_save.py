@@ -1198,6 +1198,11 @@ def do_save(account, tasklist=[]):
                         task = (
                             plugin.run(task, account=account, tree=is_new_tree) or task
                         )
+                
+                # 为防止alist接口请求过多，加入10秒间隔
+                import time
+                print("⏳ 延时10秒以防接口受限...")
+                time.sleep(10)
     print()
     print(f"===============插件收尾===============")
     for plugin_name, plugin in plugins.items():

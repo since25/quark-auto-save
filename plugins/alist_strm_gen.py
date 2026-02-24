@@ -133,7 +133,7 @@ class Alist_strm_gen:
         if data.get("code") != 200:
             print(f"📺 Alist-Strm生成: 获取文件列表失败❌{data.get('message')}")
             return
-        elif files := data.get("data", {}).get("content"):
+        elif (dir_data := data.get("data")) and (files := dir_data.get("content")):
             for item in files:
                 item_path = f"{path}/{item.get('name')}".replace("//", "/")
                 if item.get("is_dir"):
